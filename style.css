@@ -1,0 +1,68 @@
+/*
+Theme Name: sumakou-theme
+Theme URI: https://github.com/mani-plan/themes
+Description: 住まい工房まつやまのテーマ（2021年リニューアル）
+Author: manidesign
+Author URI: https://manidesign.org/
+Version: 1.0
+Tested up to: 5.4
+Requires PHP: 5.6
+License: GNU General Public License v2 or later
+License URI: LICENSE
+Text Domain: sumakou-theme
+*/
+
+.aligncenter {
+	clear: both;
+	display: block;
+	float: none;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+}
+.alignleft {
+  float: left;
+}
+.alignright {
+  float: right;
+}
+.bypostauthor {
+	display: block;
+}
+.gallery-caption {
+	display: block;
+}
+.wp-caption {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  max-width: 96%; /* Image does not overflow the content area */
+  padding: 5px 3px 10px;
+  text-align: center;
+}
+.wp-caption p.wp-caption-text {
+  font-size: 11px;
+  line-height: 17px;
+  margin: 0;
+  padding: 0 4px 5px;
+}
+
+.screen-reader-text {
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute !important;
+	width: 1px;
+	word-wrap: normal !important; /* Many screen reader and browser combinations announce broken words as they would appear visually. */
+}
+
+.acf-map {
+  width: 100%;
+  height: 600px;
+}
+.acf-map img {
+  max-width: inherit !important;
+}
