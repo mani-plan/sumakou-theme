@@ -16,7 +16,6 @@
   <meta name="keywords" content="">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <title><?php wp_title( ' | ', true, 'right' ); ?>株式会社住まい工房まつやま</title>
   <?php wp_head(); ?>
 </head>
 <body>
