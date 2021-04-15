@@ -13,3 +13,10 @@ define('GMAP_API_KEY', 'XXXXXXXXXX');
 ブラウザでデザインを確認するための下地です。
 公開サイトでは使いません。
 PHPのテンプレートファイルとは css, images, js の階層が異なります。
+
+## titleタグについて
+functions.php に
+```
+add_theme_support( 'title-tag' );
+```
+と記述しているので header.php のタイトルタグは不要になります。
