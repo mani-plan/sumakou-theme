@@ -19,7 +19,7 @@ function initMap(acfMap) {
   // Add markers.
   map.markers = [];
   markers.forEach(function(mkr, index) {
-    if ( ['sold', 'solar'].includes(mkr.dataset.icon) ) {
+    if ( ['sold'].includes(mkr.dataset.icon) ) {
       return;
     }
     initMarker(mkr, map);
@@ -59,8 +59,17 @@ function initMarker( mkr, map ) {
     house: {
       icon: images + "ico_map_house.png",
     },
+    house_solar: {
+      icon: images + "ico_map_house.png",
+    },
     apartment: {
       icon: images + "ico_map_apartment.png",
+    },
+    apartment_solar: {
+      icon: images + "ico_map_apartment.png",
+    },
+    solar: {
+      icon: images + "ico_solar.png",
     },
   };
   // Create marker instance.

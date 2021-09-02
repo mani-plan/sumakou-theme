@@ -18,7 +18,7 @@
     $terms = get_the_terms($post->ID, 'estate_cat');
 
     $slugs = array();
-    $excludes = ['sold', 'solar'];
+    $excludes = ['sold'];
     foreach( $terms as $term ) {
       if ( in_array( $term->slug, $excludes, true ) ) {
         continue;
@@ -34,7 +34,12 @@
       data-lat="<?php echo $location['lat'];?>"
       data-lng="<?php echo $location['lng'];?>"
       data-images="<?php echo $images;?>"
-      data-icon="<?php echo $slugs[0];?>"
+      data-icon="<?php
+      //  echo $slugs[0];
+       global $mani_estate_map;
+        $icon = $mani_estate_map->get_map_icon($slugs);
+        echo $icon;
+       ?>"
       >
       <h4><?php the_title();?></h4>
       <p class="address"><?php echo $location['address'];?></p>

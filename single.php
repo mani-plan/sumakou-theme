@@ -5,13 +5,13 @@
 </div><!-- /.main-img-area -->
 
 <div class="page inner narrow">
-<?php if(have_posts()): while(have_posts()): the_post(); ?>
+<?php if (have_posts()): while(have_posts()): the_post(); ?>
 <article>
 <section>
   <header class="entry-hdr">
     <p class="cat">
       <?php $category = get_the_category();
-      if ( $category[0] ) {
+      if (isset($category[0])) {
         echo '<a href="' . get_category_link( $category[0]->term_id ) . '">' . $category[0]->cat_name . '</a>';
       } ?></p>
     <p class="addition"><?php the_time('Y/m/d'); ?></p>
