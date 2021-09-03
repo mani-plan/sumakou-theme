@@ -60,16 +60,16 @@ function initMarker( mkr, map ) {
       icon: images + "ico_map_house.png",
     },
     house_solar: {
-      icon: images + "ico_map_house.png",
+      icon: images + "ico_map_house_solar.png",
     },
     apartment: {
       icon: images + "ico_map_apartment.png",
     },
     apartment_solar: {
-      icon: images + "ico_map_apartment.png",
+      icon: images + "ico_map_apartment_solar.png",
     },
     solar: {
-      icon: images + "ico_solar.png",
+      icon: images + "ico_map_solar.png",
     },
   };
   // Create marker instance.
