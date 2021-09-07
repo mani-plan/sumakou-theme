@@ -19,10 +19,11 @@ function initMap(acfMap) {
   // Add markers.
   map.markers = [];
   markers.forEach(function(mkr, index) {
-    if ( ['sold'].includes(mkr.dataset.icon) ) {
+    const categories = mkr.dataset.categories;
+    if ( categories.includes('sold') ) {
       return;
     }
-    initMarker(mkr, map);
+    initMarker(mkr, map, categories);
   });
 
   // Center map based on markers.
@@ -34,48 +35,27 @@ function initMap(acfMap) {
   
 /**
  * initMarker
- *
- * @param   object element.
- * @param   object The map instance.
- * @return  object The marker instance.
  */
-function initMarker( mkr, map ) {
+function initMarker( mkr, map, categories ) {
 
   // Get position from marker.
-  var lat = mkr.dataset.lat;
-  var lng = mkr.dataset.lng;
-  var latLng = {
+  const lat = mkr.dataset.lat;
+  const lng = mkr.dataset.lng;
+  const latLng = {
     lat: parseFloat( lat ),
     lng: parseFloat( lng )
   };
-  var icon = mkr.dataset.icon;
-
+ 
   /**
    * Google Maps Platform
    * Customizing a Google Map: Custom Markers
    */
-  const images = mkr.dataset.images;
-  const icons = {
-    house: {
-      icon: images + "ico_map_house.png",
-    },
-    house_solar: {
-      icon: images + "ico_map_house_solar.png",
-    },
-    apartment: {
-      icon: images + "ico_map_apartment.png",
-    },
-    apartment_solar: {
-      icon: images + "ico_map_apartment_solar.png",
-    },
-    solar: {
-      icon: images + "ico_map_solar.png",
-    },
-  };
+  const icon = mkr.dataset.images + getMarkerIcon(categories);
+
   // Create marker instance.
   var marker = new google.maps.Marker({
     position : latLng,
-    icon: icons[icon].icon,
+    icon: icon,
     map: map
   });
 
@@ -122,7 +102,31 @@ function centerMap( map ) {
     map.fitBounds( bounds );
   }
 }
-  
+
+/*
+ * getMarkerIcon
+ */
+function getMarkerIcon( categories ) {
+  if (categories.includes('house')) {
+    if (categories.includes('solar')) {
+      return "ico_map_house_solar.png";
+    } else {
+      return "ico_map_house.png";
+    }
+  }
+  if (categories.includes('apartment')) {
+    if (categories.includes('solar')) {
+      return "ico_map_apartment_solar.png";
+    } else {
+      return "ico_map_apartment.png";
+    }
+  }
+  if (categories.includes('solar')) {
+    return "ico_map_solar.png";
+  }
+  return "ico_map_house.png";
+}
+
 document.addEventListener("DOMContentLoaded", function(event) {
 
   var acfMaps = document.querySelectorAll('.acf-map');
