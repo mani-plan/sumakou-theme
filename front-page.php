@@ -39,6 +39,43 @@ Template Name: FrontPage
   </div>
 </div><!-- /.top-concept-area -->
 
+<div class="top-sticky-area">
+  <h2 class="cont-title">ピックアップ</h2>
+  <?php
+  $args = array(
+    'post_type' => 'post',
+    'posts_per_page' => 2,
+    'post__in' => get_option( 'sticky_posts' )
+  );
+  $the_query = new WP_Query($args); if($the_query->have_posts()):
+  ?>
+  <ul class="post-list inner">
+  <?php while ($the_query->have_posts()): $the_query->the_post(); ?>
+    <li class="fadein"><a href="<?php the_permalink(); ?>">
+      <div class="thumb-area">
+        <?php if(has_post_thumbnail()) : ?>
+          <?php the_post_thumbnail('sticky-thumb'); ?>
+        <?php else : ?>
+          <img src="<?php echo esc_url( get_template_directory_uri() ); ?>/images/thumb_default.png" alt="noimage">
+        <?php endif; ?>
+        <p class="cat"><?php $category = get_the_category(); 
+                  if ( $category[0] ) { echo $category[0]->cat_name; } ?></p>
+      </div>
+      <h3><?php the_title(); ?></h3>
+    </a></li>
+  <?php endwhile; ?>
+  </ul><!-- /.post-list -->
+      <?php wp_reset_postdata(); ?>
+  <?php endif; ?>
+</div><!-- /.top-sticky-area -->
+
+<div class="pickup-page">
+  <ul class="inner narrow">
+    <li class="fadein solar"><a href="<?php echo esc_url(home_url('/total_of_solar_power')); ?>"><span>当社施工の</span>太陽光発電実績 すべて公開中！</a></li>
+    <li class="fadein estate"><a href="<?php echo esc_url(home_url('/estate')); ?>"><span>当社施工の</span>自社所有物件はこちら！</a></li>
+  </ul>
+</div><!-- /.pickup-page -->
+
 
 <div class="top-works-area">
 
@@ -117,7 +154,8 @@ foreach ( $categories as $category ) {
   $args = array(
     'post_type' => 'post',
     // 'category__not_in' => 1,
-    'posts_per_page' => 3
+    'posts_per_page' => 3,
+    'post__not_in' => get_option( 'sticky_posts' )
   );
   $the_query = new WP_Query($args); if($the_query->have_posts()):
 ?>
