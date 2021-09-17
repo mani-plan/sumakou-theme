@@ -5,8 +5,6 @@ google.charts.setOnLoadCallback(initChart);
 
 function initChart() {
   URL = solarsheet;
-  console.log(solarsheet);
-
   var query = new google.visualization.Query(URL);
   query.setQuery('select *');
   query.send(function(response) {
@@ -44,7 +42,6 @@ function handleQueryResponse(response) {
   makeChart('chartRevenue', dataj, chartdata, '金額');
 
   datasets = makeGenerateDatasets(dataj, colors);
-  // labels = setLabels(labels, '金額', '電力量');
   chartdata = {
     labels: labels,
     datasets: datasets
@@ -52,6 +49,7 @@ function handleQueryResponse(response) {
 
   makeChart('chartGenerate', dataj, chartdata, '電力量(kwh)');
   
+  makeTable(dataj);
 }
 
 function getLabels(dataJson) {
@@ -172,4 +170,10 @@ function makeChart(elementId, dataJson, chartdata, ytitle) {
     }
   }
   chart = new Chart(canvas, setup);
+}
+
+function makeTable(dataJson) {
+  var table = document.getElementById("myTable");
+  const t = document.createElement("table");
+  table.appendChild(t);
 }
