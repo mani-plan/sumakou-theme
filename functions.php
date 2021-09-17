@@ -23,6 +23,7 @@ add_action('wp_enqueue_scripts', 'add_files');
 add_theme_support( 'post-thumbnails' );
 set_post_thumbnail_size(400, 267, true );
 add_image_size( 'estate-thumb', 60, 60, true );
+add_image_size( 'sticky-thumb', 620, 413, true );
 
 
 /*【出力カスタマイズ】年別アーカイブリストに年を表示する */
