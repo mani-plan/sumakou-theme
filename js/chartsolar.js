@@ -32,8 +32,8 @@ function handleQueryResponse(response) {
   dataj = JSON.parse(data.toJSON());
   let labels = [];
   labels = getLabels(dataj);
+  labels = setLabels(labels, '電力量', '金額');
 
-  // const datasets = [];
   let datasets = makeRevenueDatasets(dataj, colors);
 
   let chartdata = {
@@ -44,7 +44,7 @@ function handleQueryResponse(response) {
   makeChart('chartRevenue', dataj, chartdata);
 
   datasets = makeGenerateDatasets(dataj, colors);
-
+  labels = setLabels(labels, '金額', '電力量');
   chartdata = {
     labels: labels,
     datasets: datasets
@@ -60,6 +60,14 @@ function getLabels(dataJson) {
     labels.push(dataJson.cols[j * 2 + 1].label);
   }
   return labels;
+}
+
+function setLabels(labels, beforeName, afterName) {
+  const newLabels = [];
+  for (i = 0; i < labels.length; i++) {
+    newLabels.push(labels[i].replace(beforeName, afterName));
+  }
+  return newLabels;
 }
 
 function getRevenues(i, dataJson) {
