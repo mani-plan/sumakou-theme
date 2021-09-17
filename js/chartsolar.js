@@ -32,7 +32,7 @@ function handleQueryResponse(response) {
   dataj = JSON.parse(data.toJSON());
   let labels = [];
   labels = getLabels(dataj);
-  labels = setLabels(labels, '電力量', '金額');
+  labels = setLabels(labels, ' 電力量', '');
 
   let datasets = makeRevenueDatasets(dataj, colors);
 
@@ -41,16 +41,16 @@ function handleQueryResponse(response) {
     datasets: datasets
   };
 
-  makeChart('chartRevenue', dataj, chartdata);
+  makeChart('chartRevenue', dataj, chartdata, '金額');
 
   datasets = makeGenerateDatasets(dataj, colors);
-  labels = setLabels(labels, '金額', '電力量');
+  // labels = setLabels(labels, '金額', '電力量');
   chartdata = {
     labels: labels,
     datasets: datasets
   };
 
-  makeChart('chartGenerate', dataj, chartdata);
+  makeChart('chartGenerate', dataj, chartdata, '電力量(kwh)');
   
 }
 
@@ -143,7 +143,7 @@ function makeGenerateDatasets(dataJson, colors) {
   return datasets;
 }
 
-function makeChart(elementId, dataJson, chartdata) {
+function makeChart(elementId, dataJson, chartdata, ytitle) {
   var canvas = document.getElementById(elementId);
   var setup = {
     type: 'bar',
@@ -153,6 +153,15 @@ function makeChart(elementId, dataJson, chartdata) {
         title: {
           display: true,
           text: dataJson.cols[0].label
+        }
+      },
+      scales: {
+        y: {
+          display: true,
+          title: {
+            display: true,
+            text: ytitle
+          }
         }
       },
       responsive: true,
