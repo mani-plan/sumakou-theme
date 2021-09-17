@@ -156,7 +156,11 @@ function makeChart(elementId, dataJson, chartdata, ytitle) {
         }
       },
       scales: {
+        x: {
+          stacked: true,
+        },
         y: {
+          stacked: true,
           display: true,
           title: {
             display: true,
