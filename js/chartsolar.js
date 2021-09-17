@@ -18,56 +18,40 @@ function handleQueryResponse(response) {
   var data = response.getDataTable();
   var columns = data.getNumberOfColumns();
   var rows = data.getNumberOfRows();
-  // console.log(data.toJSON());
 
   const colors = [
     'rgb(54, 162, 235)',
     'rgb(255, 99, 132)',
     'rgb(75, 192, 192)',
     'rgb(255, 206, 86)',
-    'rgb(153, 102, 255)'
+    'rgb(153, 102, 255)',
+    'orange',
+    'grey'
   ];
+
   dataj = JSON.parse(data.toJSON());
-  // console.log(dataj.cols[0].label);
   let labels = [];
   labels = getLabels(dataj);
 
-  const datasets = [];
-  for (i = 0; i < dataj.rows.length; i++) {
-    let series_data = [];
-    series_data = getRevenues(i, dataj);
-    var dataset = {
-      label: dataj.rows[i].c[0].v,
-      backgroundColor: colors[i],
-      borderColor: colors[i],
-      data: series_data
-    }
+  // const datasets = [];
+  let datasets = makeRevenueDatasets(dataj, colors);
 
-    datasets.push(dataset);
-
-  }
-  // console.log(datasets);
-
-  const chartdata = {
+  let chartdata = {
     labels: labels,
     datasets: datasets
   };
-  var canvas = document.getElementById("myChart");
-  var setup = {
-    type: 'line',
-    data: chartdata,
-    options: {
-      plugins: {
-        title: {
-          display: true,
-          text: dataj.cols[0].label
-        }
-      },
-      responsive: true,
-    }
-  }
-  chart = new Chart(canvas, setup);
 
+  makeChart('chartRevenue', dataj, chartdata);
+
+  datasets = makeGenerateDatasets(dataj, colors);
+
+  chartdata = {
+    labels: labels,
+    datasets: datasets
+  };
+
+  makeChart('chartGenerate', dataj, chartdata);
+  
 }
 
 function getLabels(dataJson) {
@@ -93,4 +77,78 @@ function getRevenues(i, dataJson) {
   }
   console.log('serie:' + series_data);
   return series_data;
+}
+
+function getGenerates(i, dataJson) {
+  const series_data = [];
+  for (j = 0; j < 12; j++) {
+    if (dataJson.rows[i].c[j * 2 + 1] != null) {
+      if (dataJson.rows[i].c[j * 2 + 1].v != null) {
+        let kwh = dataJson.rows[i].c[j * 2 + 1].v;
+        series_data.push(getKwhNumber(kwh));
+      } else {
+        series_data.push(0);
+      }
+    } else {
+      series_data.push(0);
+    }
+  }
+  console.log('serie:' + series_data);
+  return series_data;
+}
+
+function getKwhNumber(kwh) {
+  kwh = kwh.replace('kwh', '');
+  kwh = kwh.replace(/,/g, '');
+  return parseInt(kwh, 10);
+}
+
+function makeRevenueDatasets(dataJson, colors) {
+  let datasets = [];
+  for (i = 0; i < dataJson.rows.length - 1; i++) {
+    let series_data = [];
+    series_data = getRevenues(i, dataj);
+    var dataset = {
+      label: dataJson.rows[i].c[0].v,
+      backgroundColor: colors[i],
+      borderColor: colors[i],
+      data: series_data
+    }
+    datasets.push(dataset);
+  }
+  return datasets;
+}
+
+function makeGenerateDatasets(dataJson, colors) {
+  let datasets = [];
+  for (i = 0; i < dataJson.rows.length - 1; i++) {
+    let series_data = [];
+    series_data = getGenerates(i, dataj);
+    var dataset = {
+      label: dataJson.rows[i].c[0].v,
+      backgroundColor: colors[i],
+      borderColor: colors[i],
+      data: series_data
+    }
+    datasets.push(dataset);
+  }
+  return datasets;
+}
+
+function makeChart(elementId, dataJson, chartdata) {
+  var canvas = document.getElementById(elementId);
+  var setup = {
+    type: 'bar',
+    data: chartdata,
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: dataJson.cols[0].label
+        }
+      },
+      responsive: true,
+    }
+  }
+  chart = new Chart(canvas, setup);
 }
