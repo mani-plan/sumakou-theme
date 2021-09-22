@@ -30,6 +30,7 @@ if ( isset( $_GET['estate_cat'] ) ) {
         alt="一戸建て" class="imghalf">…戸建て</li>
       <li><img src="<?php echo esc_url( get_template_directory_uri() );?>/images/ico_apartment.png"
         alt="アパート" class="imghalf">…アパート</li>
+      <li><img src="<?php echo esc_url( get_template_directory_uri() );?>/images/ico_solar.png" alt="太陽光発電" class="imghalf">…太陽光発電</li>
     </ul>
 
     <?php
