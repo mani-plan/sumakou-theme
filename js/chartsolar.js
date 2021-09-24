@@ -174,6 +174,21 @@ function makeChart(elementId, dataJson, chartdata, ytitle) {
 
 function makeTable(dataJson) {
   var table = document.getElementById("myTable");
-  const t = document.createElement("table");
-  table.appendChild(t);
+  var tbl = document.createElement("table");
+  var tblBody = document.createElement("tbody");
+
+  for (i = 0; i < dataJson.rows.length - 1; i++) {
+    let revenue = [];
+    revenue = getRevenues(i, dataj);
+    var row = document.createElement("tr");
+    for (j = 0; j < 12; j++) {
+      var cell = document.createElement("td");
+      var cellText = document.createTextNode(revenue[j]);
+      cell.appendChild(cellText);
+      row.appendChild(cell);
+    }
+    tblBody.appendChild(row);
+  }
+  tbl.appendChild(tblBody);
+  table.appendChild(tbl);
 }
