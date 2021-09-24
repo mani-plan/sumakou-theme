@@ -81,7 +81,6 @@ function getRevenues(i, dataJson) {
       series_data.push(0);
     }
   }
-  console.log('serie:' + series_data);
   return series_data;
 }
 
@@ -99,7 +98,6 @@ function getGenerates(i, dataJson) {
       series_data.push(0);
     }
   }
-  console.log('serie:' + series_data);
   return series_data;
 }
 
@@ -177,18 +175,50 @@ function makeTable(dataJson) {
   var tbl = document.createElement("table");
   var tblBody = document.createElement("tbody");
 
+  tblBody.appendChild(makeColHead(dataJson));
+
   for (i = 0; i < dataJson.rows.length - 1; i++) {
     let revenue = [];
-    revenue = getRevenues(i, dataj);
+    revenue = getRevenues(i, dataJson);
     var row = document.createElement("tr");
+    row.appendChild(makeRowHead(i, dataJson));
+
     for (j = 0; j < 12; j++) {
-      var cell = document.createElement("td");
-      var cellText = document.createTextNode(revenue[j]);
+      let cell = document.createElement("td");
+      cell.className = 'cell-right';
+      let rev = revenue[j].toLocaleString();
+      var cellText = document.createTextNode(rev);
       cell.appendChild(cellText);
       row.appendChild(cell);
     }
     tblBody.appendChild(row);
   }
+  tbl.className = 'sticky_table';
   tbl.appendChild(tblBody);
   table.appendChild(tbl);
+}
+
+function makeColHead(dataJson) {
+  let row = document.createElement("tr");
+  let cell = document.createElement("th");
+  let cellText = document.createTextNode("");
+  cell.appendChild(cellText);
+  row.appendChild(cell);
+
+  let labels = getLabels(dataJson);
+  labels = setLabels(labels, ' 電力量', '');
+  for (j = 0; j < 12; j++) {
+    let cell = document.createElement("th");
+    let cellText = document.createTextNode(labels[j]);
+    cell.appendChild(cellText);
+    row.appendChild(cell);
+  }
+  return row;
+}
+
+function makeRowHead(i, dataJson) {
+  let cell = document.createElement("td");
+  let cellText = document.createTextNode(dataJson.rows[i].c[0].v);
+  cell.appendChild(cellText);
+  return cell;
 }

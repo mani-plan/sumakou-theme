@@ -1975,3 +1975,7 @@ footer {
   transform: translateY(30px);
   transition: 1s .2s;
 }
+
+.cell-right {
+  text-align: right;
+}
