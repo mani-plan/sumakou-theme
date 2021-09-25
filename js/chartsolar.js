@@ -36,7 +36,7 @@ function handleQueryResponse(response) {
     datasets: datasets
   };
 
-  makeChart('chartRevenue', dataj, chartdata, '金額');
+  makeChart('chartRevenue', dataj, chartdata, '金額', '金額');
 
   datasets = makeGenerateDatasets(dataj, colors);
   chartdata = {
@@ -44,7 +44,7 @@ function handleQueryResponse(response) {
     datasets: datasets
   };
 
-  makeChart('chartGenerate', dataj, chartdata, '電力量(kwh)');
+  makeChart('chartGenerate', dataj, chartdata, '電力量', '電力量(kwh)');
   
   makeTable(dataj);
 }
@@ -153,7 +153,7 @@ function makeGenerateDatasets(dataJson, colors) {
   return datasets;
 }
 
-function makeChart(elementId, dataJson, chartdata, ytitle) {
+function makeChart(elementId, dataJson, chartdata, ctitle, ytitle) {
   var canvas = document.getElementById(elementId);
   var setup = {
     type: 'bar',
@@ -162,7 +162,7 @@ function makeChart(elementId, dataJson, chartdata, ytitle) {
       plugins: {
         title: {
           display: true,
-          text: dataJson.cols[0].label
+          text: ctitle
         }
       },
       scales: {
@@ -185,6 +185,7 @@ function makeChart(elementId, dataJson, chartdata, ytitle) {
 }
 
 function makeTable(dataJson) {
+  const exLabel = ['', '≪個人≫', '≪法人≫', '合計'];
   var table = document.getElementById("myTable");
   var tbl = document.createElement("table");
   var tblBody = document.createElement("tbody");
@@ -192,10 +193,14 @@ function makeTable(dataJson) {
   tblBody.appendChild(makeColHead(dataJson));
 
   for (i = 0; i < dataJson.rows.length - 1; i++) {
+    let rowLabel = makeRowHead(i, dataJson);
+    if (exLabel.indexOf(rowLabel.innerText) >= 0) {
+      continue;
+    }
     let revenue = [];
     revenue = getRevenues(i, dataJson);
-    var row = document.createElement("tr");
-    row.appendChild(makeRowHead(i, dataJson));
+    let row = document.createElement("tr");
+    row.appendChild(rowLabel);
 
     for (j = 0; j < 12; j++) {
       let cell = document.createElement("td");
@@ -205,6 +210,7 @@ function makeTable(dataJson) {
       cell.appendChild(cellText);
       row.appendChild(cell);
     }
+
     tblBody.appendChild(row);
   }
   tbl.className = 'sticky_table';
@@ -220,7 +226,7 @@ function makeColHead(dataJson) {
   row.appendChild(cell);
 
   let labels = getColLabels(dataJson);
-  for (j = 0; j < 12; j++) {
+  for (j = 0; j < labels.length; j++) {
     let cell = document.createElement("th");
     let cellText = document.createTextNode(labels[j]);
     cell.appendChild(cellText);
