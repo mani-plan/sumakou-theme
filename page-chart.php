@@ -28,7 +28,7 @@ if (have_posts()) :
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-    const solarsheet = '<?php echo GDOCS_SOLAR_SHEET;?>';
+    let solarsheet = '<?php echo GDOCS_SOLAR_SHEET;?>';
 </script>
   
         <?php the_content(); ?>

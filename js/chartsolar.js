@@ -28,10 +28,7 @@ function handleQueryResponse(response) {
   ];
 
   dataj = JSON.parse(data.toJSON());
-  let labels = [];
-  labels = getLabels(dataj);
-  labels = setLabels(labels, ' 電力量', '');
-
+  let labels = getColLabels(dataj);
   let datasets = makeRevenueDatasets(dataj, colors);
 
   let chartdata = {
@@ -52,56 +49,53 @@ function handleQueryResponse(response) {
   makeTable(dataj);
 }
 
-function getLabels(dataJson) {
+function getColLabels(dataJson) {
   const labels = [];
   for (j = 0; j < 12; j++) {
-    labels.push(dataJson.cols[j * 2 + 1].label);
+    if (dataJson.cols[j * 4 + 1].label != null) {
+      let label = dataJson.cols[j * 4 + 1].label;
+      labels.push(label.replace(' 期間', ''));
+    }
   }
   return labels;
 }
 
-function setLabels(labels, beforeName, afterName) {
-  const newLabels = [];
-  for (i = 0; i < labels.length; i++) {
-    newLabels.push(labels[i].replace(beforeName, afterName));
-  }
-  return newLabels;
-}
-
 function getRevenues(i, dataJson) {
-  const series_data = [];
+  const revs = [];
   for (j = 0; j < 12; j++) {
-    if (dataJson.rows[i].c[j * 2 + 2] != null) {
-      if (dataJson.rows[i].c[j * 2 + 2].v != null) {
-        series_data.push(dataJson.rows[i].c[j * 2 + 2].v);
+    if (dataJson.rows[i].c[j * 4 + 3] != null) {
+      if (dataJson.rows[i].c[j * 4 + 3].v != null) {
+        revs.push(dataJson.rows[i].c[j * 4 + 3].v);
       } else {
-        series_data.push(0);
+        revs.push(0);
       }
     } else {
-      series_data.push(0);
+      revs.push(0);
     }
   }
-  return series_data;
+  return revs;
 }
 
 function getGenerates(i, dataJson) {
-  const series_data = [];
+  const gens = [];
   for (j = 0; j < 12; j++) {
-    if (dataJson.rows[i].c[j * 2 + 1] != null) {
-      if (dataJson.rows[i].c[j * 2 + 1].v != null) {
-        let kwh = dataJson.rows[i].c[j * 2 + 1].v;
-        series_data.push(getKwhNumber(kwh));
+    if (dataJson.rows[i].c[j * 4 + 2] != null) {
+      if (dataJson.rows[i].c[j * 4 + 2].v != null) {
+        let kwh = dataJson.rows[i].c[j * 4 + 2].v;
+        gens.push(getKwhNumber(kwh));
       } else {
-        series_data.push(0);
+        gens.push(0);
       }
     } else {
-      series_data.push(0);
+      gens.push(0);
     }
   }
-  return series_data;
+  console.log("rev:" + gens);
+  return gens;
 }
 
 function getKwhNumber(kwh) {
+  console.log("kwh:" + kwh);
   kwh = kwh.replace('kwh', '');
   kwh = kwh.replace(/,/g, '');
   return parseInt(kwh, 10);
@@ -110,6 +104,16 @@ function getKwhNumber(kwh) {
 function makeRevenueDatasets(dataJson, colors) {
   let datasets = [];
   for (i = 0; i < dataJson.rows.length - 1; i++) {
+    if (dataJson.rows[i].c[0] == null) {
+      continue;
+    }
+    if (dataJson.rows[i].c[0].v == null) {
+      continue;
+    }
+    const rowLabel = dataJson.rows[i].c[0].v;
+    if (rowLabel.includes('≪個人≫') || rowLabel.includes('≪法人≫')) {
+      continue;
+    }
     let series_data = [];
     series_data = getRevenues(i, dataj);
     var dataset = {
@@ -126,6 +130,16 @@ function makeRevenueDatasets(dataJson, colors) {
 function makeGenerateDatasets(dataJson, colors) {
   let datasets = [];
   for (i = 0; i < dataJson.rows.length - 1; i++) {
+    if (dataJson.rows[i].c[0] == null) {
+      continue;
+    }
+    if (dataJson.rows[i].c[0].v == null) {
+      continue;
+    }
+    const rowLabel = dataJson.rows[i].c[0].v;
+    if (rowLabel.includes('≪個人≫') || rowLabel.includes('≪法人≫')) {
+      continue;
+    }
     let series_data = [];
     series_data = getGenerates(i, dataj);
     var dataset = {
@@ -205,8 +219,7 @@ function makeColHead(dataJson) {
   cell.appendChild(cellText);
   row.appendChild(cell);
 
-  let labels = getLabels(dataJson);
-  labels = setLabels(labels, ' 電力量', '');
+  let labels = getColLabels(dataJson);
   for (j = 0; j < 12; j++) {
     let cell = document.createElement("th");
     let cellText = document.createTextNode(labels[j]);
@@ -218,7 +231,13 @@ function makeColHead(dataJson) {
 
 function makeRowHead(i, dataJson) {
   let cell = document.createElement("td");
-  let cellText = document.createTextNode(dataJson.rows[i].c[0].v);
+  let cellVal = '';
+  if (dataJson.rows[i].c[0] != null) {
+    if (dataJson.rows[i].c[0].v != null) {
+      cellVal = dataJson.rows[i].c[0].v;
+    }
+  }
+  let cellText = document.createTextNode(cellVal);
   cell.appendChild(cellText);
   return cell;
 }
