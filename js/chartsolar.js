@@ -90,12 +90,10 @@ function getGenerates(i, dataJson) {
       gens.push(0);
     }
   }
-  console.log("rev:" + gens);
   return gens;
 }
 
 function getKwhNumber(kwh) {
-  console.log("kwh:" + kwh);
   kwh = kwh.replace('kwh', '');
   kwh = kwh.replace(/,/g, '');
   return parseInt(kwh, 10);
