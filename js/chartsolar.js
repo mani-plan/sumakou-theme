@@ -249,13 +249,13 @@ function checkExcludeRow(rowLabel) {
 
 function setColor(i) {
   const colors = [
-    'rgb(54, 162, 235)',
-    'rgb(255, 99, 132)',
-    'rgb(75, 192, 192)',
-    'rgb(255, 206, 86)',
-    'rgb(153, 102, 255)',
-    'orange',
-    'grey'
+    '#8dd3c7',
+    '#ffffb3',
+    '#bebada',
+    '#fb8072',
+    '#80b1d3',
+    '#fdb462',
+    '#b3de69'
   ];
   return colors[i % colors.length];
 }
