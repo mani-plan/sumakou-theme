@@ -17,19 +17,9 @@ function handleQueryResponse(response) {
   var columns = data.getNumberOfColumns();
   var rows = data.getNumberOfRows();
 
-  const colors = [
-    'rgb(54, 162, 235)',
-    'rgb(255, 99, 132)',
-    'rgb(75, 192, 192)',
-    'rgb(255, 206, 86)',
-    'rgb(153, 102, 255)',
-    'orange',
-    'grey'
-  ];
-
   dataj = JSON.parse(data.toJSON());
   let labels = getColLabels(dataj);
-  let datasets = makeRevenueDatasets(dataj, colors);
+  let datasets = makeRevenueDatasets(dataj);
 
   let chartdata = {
     labels: labels,
@@ -38,7 +28,7 @@ function handleQueryResponse(response) {
 
   makeChart('chartRevenue', dataj, chartdata, '金額', '金額');
 
-  datasets = makeGenerateDatasets(dataj, colors);
+  datasets = makeGenerateDatasets(dataj);
   chartdata = {
     labels: labels,
     datasets: datasets
@@ -99,7 +89,7 @@ function getKwhNumber(kwh) {
   return parseInt(kwh, 10);
 }
 
-function makeRevenueDatasets(dataJson, colors) {
+function makeRevenueDatasets(dataJson) {
   let datasets = [];
   for (i = 0; i < dataJson.rows.length - 1; i++) {
     if (dataJson.rows[i].c[0] == null) {
@@ -109,15 +99,15 @@ function makeRevenueDatasets(dataJson, colors) {
       continue;
     }
     const rowLabel = dataJson.rows[i].c[0].v;
-    if (rowLabel.includes('≪個人≫') || rowLabel.includes('≪法人≫')) {
+    if (checkExcludeRow(rowLabel) == true) {
       continue;
     }
     let series_data = [];
     series_data = getRevenues(i, dataj);
     var dataset = {
-      label: dataJson.rows[i].c[0].v,
-      backgroundColor: colors[i],
-      borderColor: colors[i],
+      label: rowLabel,
+      backgroundColor: setColor(datasets.length),
+      borderColor: setColor(datasets.length),
       data: series_data
     }
     datasets.push(dataset);
@@ -125,7 +115,7 @@ function makeRevenueDatasets(dataJson, colors) {
   return datasets;
 }
 
-function makeGenerateDatasets(dataJson, colors) {
+function makeGenerateDatasets(dataJson) {
   let datasets = [];
   for (i = 0; i < dataJson.rows.length - 1; i++) {
     if (dataJson.rows[i].c[0] == null) {
@@ -135,15 +125,16 @@ function makeGenerateDatasets(dataJson, colors) {
       continue;
     }
     const rowLabel = dataJson.rows[i].c[0].v;
-    if (rowLabel.includes('≪個人≫') || rowLabel.includes('≪法人≫')) {
+    if (checkExcludeRow(rowLabel) == true) {
       continue;
     }
+
     let series_data = [];
     series_data = getGenerates(i, dataj);
     var dataset = {
-      label: dataJson.rows[i].c[0].v,
-      backgroundColor: colors[i],
-      borderColor: colors[i],
+      label: rowLabel,
+      backgroundColor: setColor(datasets.length),
+      borderColor: setColor(datasets.length),
       data: series_data
     }
     datasets.push(dataset);
@@ -161,7 +152,7 @@ function makeChart(elementId, dataJson, chartdata, ctitle, ytitle) {
         title: {
           display: true,
           text: ctitle
-        }
+        },
       },
       scales: {
         x: {
@@ -183,7 +174,6 @@ function makeChart(elementId, dataJson, chartdata, ctitle, ytitle) {
 }
 
 function makeTable(dataJson) {
-  const exLabel = ['', '≪個人≫', '≪法人≫', '合計'];
   var table = document.getElementById("myTable");
   var tbl = document.createElement("table");
   var tblBody = document.createElement("tbody");
@@ -192,7 +182,7 @@ function makeTable(dataJson) {
 
   for (i = 0; i < dataJson.rows.length - 1; i++) {
     let rowLabel = makeRowHead(i, dataJson);
-    if (exLabel.indexOf(rowLabel.innerText) >= 0) {
+    if (checkExcludeRow(rowLabel) == true) {
       continue;
     }
     let revenue = [];
@@ -244,4 +234,28 @@ function makeRowHead(i, dataJson) {
   let cellText = document.createTextNode(cellVal);
   cell.appendChild(cellText);
   return cell;
+}
+
+function checkExcludeRow(rowLabel) {
+  const exLabel = ['', '≪個人≫', '≪法人≫', '合計'];
+  if (typeof rowLabel == 'object') {
+    rowLabel = rowLabel.innerText;
+  }
+  if (exLabel.indexOf(rowLabel) >= 0) {
+    return true;
+  }
+  return false;
+}
+
+function setColor(i) {
+  const colors = [
+    'rgb(54, 162, 235)',
+    'rgb(255, 99, 132)',
+    'rgb(75, 192, 192)',
+    'rgb(255, 206, 86)',
+    'rgb(153, 102, 255)',
+    'orange',
+    'grey'
+  ];
+  return colors[i % colors.length];
 }
