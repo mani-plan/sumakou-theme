@@ -4,8 +4,7 @@ google.charts.load('current', {
 google.charts.setOnLoadCallback(initChart);
 
 function initChart() {
-  URL = solarsheet;
-  const query = new google.visualization.Query(URL);
+  const query = new google.visualization.Query(solarsheet);
   query.setQuery('select *');
   query.send(function(response) {
     handleQueryResponse(response);
