@@ -13,28 +13,23 @@ function initChart() {
 }
 
 function handleQueryResponse(response) {
-  var data = response.getDataTable();
-  var columns = data.getNumberOfColumns();
-  var rows = data.getNumberOfRows();
+  const data = response.getDataTable();
+  const dataj = JSON.parse(data.toJSON());
+  const labels = getColLabels(dataj);
 
-  dataj = JSON.parse(data.toJSON());
-  let labels = getColLabels(dataj);
   let datasets = makeRevenueDatasets(dataj);
-
   let chartdata = {
     labels: labels,
     datasets: datasets
   };
-
-  makeChart('chartRevenue', dataj, chartdata, '金額', '金額');
+  makeChart('chartRevenue', chartdata, '金額', '金額');
 
   datasets = makeGenerateDatasets(dataj);
   chartdata = {
     labels: labels,
     datasets: datasets
   };
-
-  makeChart('chartGenerate', dataj, chartdata, '電力量', '電力量(kwh)');
+  makeChart('chartGenerate', chartdata, '電力量', '電力量(kwh)');
   
   makeTable(dataj);
 }
@@ -103,7 +98,7 @@ function makeRevenueDatasets(dataJson) {
       continue;
     }
     let series_data = [];
-    series_data = getRevenues(i, dataj);
+    series_data = getRevenues(i, dataJson);
     var dataset = {
       label: rowLabel,
       backgroundColor: setColor(datasets.length),
@@ -130,7 +125,7 @@ function makeGenerateDatasets(dataJson) {
     }
 
     let series_data = [];
-    series_data = getGenerates(i, dataj);
+    series_data = getGenerates(i, dataJson);
     var dataset = {
       label: rowLabel,
       backgroundColor: setColor(datasets.length),
@@ -142,7 +137,7 @@ function makeGenerateDatasets(dataJson) {
   return datasets;
 }
 
-function makeChart(elementId, dataJson, chartdata, ctitle, ytitle) {
+function makeChart(elementId, chartdata, ctitle, ytitle) {
   var canvas = document.getElementById(elementId);
   var setup = {
     type: 'bar',
