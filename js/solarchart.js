@@ -17,26 +17,20 @@ function handleQueryResponse(response) {
 
   const schart = new SolarChart();
   const sdata = new SolarData(dataj);
+  const stable = new SolarTable();
   const collabels = sdata.getColLabels();
   const rowlabels = sdata.getRowLabels();
   const generates = sdata.getGenerates();
   const revenues = sdata.getRevenues();
 
-  let datasets = sdata.makeRevenueDatasets(revenues, rowlabels);
-  let chartdata = {
-    labels: collabels,
-    datasets: datasets
-  };
+  let chartdata = schart.makeDatasets(revenues, collabels, rowlabels);
   schart.makeChart('chartRevenue', chartdata, '金額', '金額');
 
-  datasets = sdata.makeGenerateDatasets(generates, rowlabels);
-  chartdata = {
-    labels: collabels,
-    datasets: datasets
-  };
+  chartdata = schart.makeDatasets(generates, collabels, rowlabels);
   schart.makeChart('chartGenerate', chartdata, '電力量', '電力量(kwh)');
   
-  schart.makeTable(revenues, collabels, rowlabels);
+  stable.makeTable('tableGenerate', generates, collabels, rowlabels);
+  stable.makeTable('tableRevenue', revenues, collabels, rowlabels);
 }
 
 class SolarChart {
@@ -72,16 +66,170 @@ class SolarChart {
     const chart = new Chart(canvas, setup);
   }
 
-  makeTable(dataset, collabels, rowlabels) {
-    const table = document.getElementById("myTable");
+  makeDatasets(datarows, collabels, rowlabels) {
+    const datasets = [];
+    for (let i = 0; i < datarows.length; i++) {
+      const dataset = {
+        label: rowlabels[i],
+        backgroundColor: this.setColor(datasets.length),
+        borderColor: this.setColor(datasets.length),
+        data: datarows[i]
+      }
+      datasets.push(dataset);
+    }
+    const chartdata = {
+      labels: collabels,
+      datasets: datasets
+    };
+    return chartdata;
+  }
+
+  setColor(i) {
+    const colors = [
+      '#8dd3c7',
+      '#ffffb3',
+      '#bebada',
+      '#fb8072',
+      '#80b1d3',
+      '#fdb462',
+      '#b3de69'
+    ];
+    return colors[i % colors.length];
+  }
+}
+
+class SolarData {
+
+  #datajson;
+  #collabels;
+  #rowlabels;
+  #revenues;
+  #generates;
+
+  constructor(dataJson) {
+    this.#datajson = dataJson;
+    this.#collabels = [];
+    this.#rowlabels = [];
+    this.#revenues = [];
+    this.#generates = [];
+  }
+
+  getColLabels() {
+    if (this.#collabels.length > 0) {
+      return this.#collabels;
+    }
+    for (let j = 0; j < 12; j++) {
+      if (this.#datajson.cols[j * 4 + 1].label != null) {
+        let label = this.#datajson.cols[j * 4 + 1].label;
+        this.#collabels.push(label.replace(' 期間', ''));
+      }
+    }
+    return this.#collabels;
+  }
+
+  getRowLabels() {
+    if (this.#rowlabels.length > 0) {
+      return this.#rowlabels;
+    }
+    for (let i = 0; i < this.#datajson.rows.length; i++) {
+      if (this.checkExcludeRow(i) == true) {
+        continue;
+      }
+      let label = this.#datajson.rows[i].c[0].v;
+      this.#rowlabels.push(label);
+    }
+    return this.#rowlabels;
+  }
+
+  getRevenues() {
+    if (this.#revenues.length > 0) {
+      return this.#revenues;
+    }
+    for (let i = 0; i < this.#datajson.rows.length; i++) {
+      if (this.checkExcludeRow(i) == true) {
+        continue;
+      }
+      let rev = [];
+      for (let j = 0; j < 12; j++) {
+        if (this.#datajson.rows[i].c[j * 4 + 3] != null) {
+          if (this.#datajson.rows[i].c[j * 4 + 3].v != null) {
+            rev.push(this.#datajson.rows[i].c[j * 4 + 3].v);
+          } else {
+            rev.push(0);
+          }
+        } else {
+          rev.push(0);
+        }
+      }
+      this.#revenues.push(rev);
+    }
+    return this.#revenues;
+  }
+
+  getGenerates() {
+    if (this.#generates.length > 0) {
+      return this.#generates;
+    }
+    for (let i = 0; i < this.#datajson.rows.length; i++) {
+      if (this.checkExcludeRow(i) == true) {
+        continue;
+      }
+      let gen = [];
+      for (let j = 0; j < 12; j++) {
+        if (this.#datajson.rows[i].c[j * 4 + 2] != null) {
+          if (this.#datajson.rows[i].c[j * 4 + 2].v != null) {
+            let kwh = this.#datajson.rows[i].c[j * 4 + 2].v;
+            gen.push(this.getKwhNumber(kwh));
+          } else {
+            gen.push(0);
+          }
+        } else {
+          gen.push(0);
+        }
+      }
+      this.#generates.push(gen);
+    }
+    return this.#generates;
+  }
+
+  checkExcludeRow(i) {
+    if (this.#datajson.rows[i].c[0] == null) {
+      return true;
+    }
+    if (this.#datajson.rows[i].c[0].v == null) {
+      return true;
+    }
+    const rowLabel = this.#datajson.rows[i].c[0].v;
+    const exLabel = ['', '≪個人≫', '≪法人≫', '合計', '個人法人合計'];
+    if (typeof rowLabel == 'object') {
+      rowLabel = rowLabel.innerText;
+    }
+    if (exLabel.indexOf(rowLabel) >= 0) {
+      return true;
+    }
+    return false;
+  }
+
+  getKwhNumber(kwh) {
+    kwh = kwh.replace('kwh', '');
+    kwh = kwh.replace(/,/g, '');
+    return parseInt(kwh, 10);
+  }
+
+}
+
+class SolarTable {
+
+  makeTable(elementId, datarows, collabels, rowlabels) {
+    const table = document.getElementById(elementId);
     const tbl = document.createElement("table");
     const tblBody = document.createElement("tbody");
     tblBody.appendChild(this.makeColHead(collabels));
   
-    for (let i = 0; i < dataset.length - 1; i++) {
+    for (let i = 0; i < datarows.length; i++) {
       let rowLabel = this.makeRowHead(i, rowlabels);
 
-      let rowdata = dataset[i];
+      let rowdata = datarows[i];
       let row = document.createElement("tr");
       row.appendChild(rowLabel);
   
@@ -123,166 +271,5 @@ class SolarChart {
     let cellText = document.createTextNode(rowlabels[i]);
     cell.appendChild(cellText);
     return cell;
-  }
-
-}
-
-class SolarData {
-
-  #datajson;
-  #collabels;
-  #rowlabels;
-  #revenues;
-  #generates;
-
-  constructor(dataJson) {
-    this.#datajson = dataJson;
-    this.#collabels = [];
-    this.#rowlabels = [];
-    this.#revenues = [];
-    this.#generates = [];
-  }
-
-  getColLabels() {
-    if (this.#collabels.length > 0) {
-      return this.#collabels;
-    }
-    for (let j = 0; j < 12; j++) {
-      if (this.#datajson.cols[j * 4 + 1].label != null) {
-        let label = this.#datajson.cols[j * 4 + 1].label;
-        this.#collabels.push(label.replace(' 期間', ''));
-      }
-    }
-    return this.#collabels;
-  }
-
-  getRowLabels() {
-    if (this.#rowlabels.length > 0) {
-      return this.#rowlabels;
-    }
-    for (let i = 0; i < this.#datajson.rows.length - 1; i++) {
-      if (this.checkExcludeRow(i) == true) {
-        continue;
-      }
-      let label = this.#datajson.rows[i].c[0].v;
-      this.#rowlabels.push(label);
-    }
-    return this.#rowlabels;
-  }
-
-  getRevenues() {
-    if (this.#revenues.length > 0) {
-      return this.#revenues;
-    }
-    for (let i = 0; i < this.#datajson.rows.length - 1; i++) {
-      if (this.checkExcludeRow(i) == true) {
-        continue;
-      }
-      let rev = [];
-      for (let j = 0; j < 12; j++) {
-        if (this.#datajson.rows[i].c[j * 4 + 3] != null) {
-          if (this.#datajson.rows[i].c[j * 4 + 3].v != null) {
-            rev.push(this.#datajson.rows[i].c[j * 4 + 3].v);
-          } else {
-            rev.push(0);
-          }
-        } else {
-          rev.push(0);
-        }
-      }
-      this.#revenues.push(rev);
-    }
-    return this.#revenues;
-  }
-
-  getGenerates() {
-    if (this.#generates.length > 0) {
-      return this.#generates;
-    }
-    for (let i = 0; i < this.#datajson.rows.length - 1; i++) {
-      if (this.checkExcludeRow(i) == true) {
-        continue;
-      }
-      let gen = [];
-      for (let j = 0; j < 12; j++) {
-        if (this.#datajson.rows[i].c[j * 4 + 2] != null) {
-          if (this.#datajson.rows[i].c[j * 4 + 2].v != null) {
-            let kwh = this.#datajson.rows[i].c[j * 4 + 2].v;
-            gen.push(this.getKwhNumber(kwh));
-          } else {
-            gen.push(0);
-          }
-        } else {
-          gen.push(0);
-        }
-      }
-      this.#generates.push(gen);
-    }
-    return this.#generates;
-  }
-
-  makeRevenueDatasets(revenues, labels) {
-    const datasets = [];
-    for (let i = 0; i < revenues.length; i++) {
-      const dataset = {
-        label: labels[i],
-        backgroundColor: this.setColor(datasets.length),
-        borderColor: this.setColor(datasets.length),
-        data: revenues[i]
-      }
-      datasets.push(dataset);
-    }
-    return datasets;
-  }
-
-  makeGenerateDatasets(generates, labels) {
-    const datasets = [];
-    for (let i = 0; i < generates.length; i++) {
-      const dataset = {
-        label: labels[i],
-        backgroundColor: this.setColor(datasets.length),
-        borderColor: this.setColor(datasets.length),
-        data: generates[i]
-      }
-      datasets.push(dataset);
-    }
-    return datasets;
-  }
-
-  checkExcludeRow(i) {
-    if (this.#datajson.rows[i].c[0] == null) {
-      return true;
-    }
-    if (this.#datajson.rows[i].c[0].v == null) {
-      return true;
-    }
-    const rowLabel = this.#datajson.rows[i].c[0].v;
-    const exLabel = ['', '≪個人≫', '≪法人≫', '合計'];
-    if (typeof rowLabel == 'object') {
-      rowLabel = rowLabel.innerText;
-    }
-    if (exLabel.indexOf(rowLabel) >= 0) {
-      return true;
-    }
-    return false;
-  }
-
-  getKwhNumber(kwh) {
-    kwh = kwh.replace('kwh', '');
-    kwh = kwh.replace(/,/g, '');
-    return parseInt(kwh, 10);
-  }
-
-  setColor(i) {
-    const colors = [
-      '#8dd3c7',
-      '#ffffb3',
-      '#bebada',
-      '#fb8072',
-      '#80b1d3',
-      '#fdb462',
-      '#b3de69'
-    ];
-    return colors[i % colors.length];
   }
 }
