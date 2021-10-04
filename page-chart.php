@@ -31,7 +31,11 @@ if (have_posts()) :
     let solarsheet = '<?php echo GDOCS_SOLAR_SHEET;?>';
 </script>
   
-        <?php the_content(); ?>
+<div class="entry-body">
+
+<?php the_content(); ?>
+
+</div><!-- /.entry-body -->
 
 </div><!-- /.page -->
 

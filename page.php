@@ -13,7 +13,11 @@
 
 <div class="page inner">
 
+<div class="entry-body">
+
 <?php the_content(); ?>
+
+</div><!-- /.entry-body -->
 
 </div><!-- /.page -->
 
