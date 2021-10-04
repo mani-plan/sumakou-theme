@@ -27,7 +27,7 @@ function handleQueryResponse(response) {
   schart.makeChart('chartGenerate', chartdata, '電力量', '電力量(kwh)', 'line');
 
   chartdata = schart.makeDatasets(revenues, collabels, rowlabels);
-  schart.makeChart('chartRevenue', chartdata, '金額', '金額', 'stacked');
+  schart.makeChart('chartRevenue', chartdata, '金額', '金額', 'bar', true);
   
   stable.makeTable('tableGenerate', generates, collabels, rowlabels);
   stable.makeTable('tableRevenue', revenues, collabels, rowlabels);
@@ -35,7 +35,7 @@ function handleQueryResponse(response) {
 
 class SolarChart {
 
-  makeChart(elementId, chartdata, ctitle, ytitle, charttype) {
+  makeChart(elementId, chartdata, ctitle, ytitle, charttype, stacked = false) {
     const canvas = document.getElementById(elementId);
     const setup = {
       type: charttype,
@@ -49,10 +49,10 @@ class SolarChart {
         },
         scales: {
           x: {
-            stacked: false
+            stacked: stacked
           },
           y: {
-            stacked: false,
+            stacked: stacked,
             display: true,
             title: {
               display: true,
@@ -63,11 +63,6 @@ class SolarChart {
         responsive: true,
       }
     }
-    if (charttype == 'stacked') {
-      setup.type = 'bar';
-      setup.options.scales.x.stacked = true;
-      setup.options.scales.y.stacked = true;
-    }
     const chart = new Chart(canvas, setup);
   }
 
@@ -76,8 +71,8 @@ class SolarChart {
     for (let i = 0; i < datarows.length; i++) {
       const dataset = {
         label: rowlabels[i],
-        backgroundColor: this.setColor(datasets.length),
-        borderColor: this.setColor(datasets.length),
+        backgroundColor: this.setColor(i),
+        borderColor: this.setColor(i),
         data: datarows[i]
       }
       datasets.push(dataset);
