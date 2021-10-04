@@ -22,6 +22,7 @@ function handleQueryResponse(response) {
   const rowlabels = sdata.getRowLabels();
   const generates = sdata.getGenerates();
   const revenues = sdata.getRevenues();
+  const spans = sdata.getSpans();
 
   let chartdata = schart.makeDatasets(generates, collabels, rowlabels);
   schart.makeChart('chartGenerate', chartdata, '電力量', '電力量(kwh)', 'line');
@@ -31,6 +32,7 @@ function handleQueryResponse(response) {
   
   stable.makeTable('tableGenerate', generates, collabels, rowlabels);
   stable.makeTable('tableRevenue', revenues, collabels, rowlabels);
+  stable.makeTable('tableSpan', spans, collabels, rowlabels);
 }
 
 class SolarChart {
@@ -105,6 +107,7 @@ class SolarData {
   #rowlabels;
   #revenues;
   #generates;
+  #spans;
 
   constructor(dataJson) {
     this.#datajson = dataJson;
@@ -112,6 +115,7 @@ class SolarData {
     this.#rowlabels = [];
     this.#revenues = [];
     this.#generates = [];
+    this.#spans = [];
   }
 
   getColLabels() {
@@ -192,6 +196,32 @@ class SolarData {
     return this.#generates;
   }
 
+  getSpans() {
+    if (this.#spans.length > 0) {
+      return this.#spans;
+    }
+    for (let i = 0; i < this.#datajson.rows.length; i++) {
+      if (this.checkExcludeRow(i) == true) {
+        continue;
+      }
+      let span = [];
+      for (let j = 0; j < 12; j++) {
+        if (this.#datajson.rows[i].c[j * 4 + 1] != null) {
+          if (this.#datajson.rows[i].c[j * 4 + 1].v != null) {
+            let spn = this.#datajson.rows[i].c[j * 4 + 1].v;
+            span.push(this.getDate(spn));
+          } else {
+            span.push('');
+          }
+        } else {
+          span.push('');
+        }
+      }
+      this.#spans.push(span);
+    }
+    return this.#spans;
+  }
+
   checkExcludeRow(i) {
     if (this.#datajson.rows[i].c[0] == null) {
       return true;
@@ -216,6 +246,16 @@ class SolarData {
     return parseInt(kwh, 10);
   }
 
+  getDate(datestr) {
+    const thisyear = 2021;
+    const days = datestr.split('～');
+    let fromdate = new Date(String(thisyear) + '/' + days[0]);
+    const todate = new Date(String(thisyear) + '/' + days[1]);
+    if (fromdate > todate) {
+      fromdate = new Date(String(thisyear - 1) + '/' + days[0]);
+    }
+    return (todate - fromdate) / 86400000 + 1;
+  }
 }
 
 class SolarTable {
