@@ -23,11 +23,11 @@ function handleQueryResponse(response) {
   const generates = sdata.getGenerates();
   const revenues = sdata.getRevenues();
 
-  let chartdata = schart.makeDatasets(revenues, collabels, rowlabels);
-  schart.makeChart('chartRevenue', chartdata, '金額', '金額');
+  let chartdata = schart.makeDatasets(generates, collabels, rowlabels);
+  schart.makeChart('chartGenerate', chartdata, '電力量', '電力量(kwh)', 'line');
 
-  chartdata = schart.makeDatasets(generates, collabels, rowlabels);
-  schart.makeChart('chartGenerate', chartdata, '電力量', '電力量(kwh)');
+  chartdata = schart.makeDatasets(revenues, collabels, rowlabels);
+  schart.makeChart('chartRevenue', chartdata, '金額', '金額', 'stacked');
   
   stable.makeTable('tableGenerate', generates, collabels, rowlabels);
   stable.makeTable('tableRevenue', revenues, collabels, rowlabels);
@@ -35,10 +35,10 @@ function handleQueryResponse(response) {
 
 class SolarChart {
 
-  makeChart(elementId, chartdata, ctitle, ytitle) {
+  makeChart(elementId, chartdata, ctitle, ytitle, charttype) {
     const canvas = document.getElementById(elementId);
     const setup = {
-      type: 'bar',
+      type: charttype,
       data: chartdata,
       options: {
         plugins: {
@@ -49,10 +49,10 @@ class SolarChart {
         },
         scales: {
           x: {
-            stacked: true,
+            stacked: false
           },
           y: {
-            stacked: true,
+            stacked: false,
             display: true,
             title: {
               display: true,
@@ -62,6 +62,11 @@ class SolarChart {
         },
         responsive: true,
       }
+    }
+    if (charttype == 'stacked') {
+      setup.type = 'bar';
+      setup.options.scales.x.stacked = true;
+      setup.options.scales.y.stacked = true;
     }
     const chart = new Chart(canvas, setup);
   }
