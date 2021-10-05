@@ -23,16 +23,21 @@ function handleQueryResponse(response) {
   const generates = sdata.getGenerates();
   const revenues = sdata.getRevenues();
   const spans = sdata.getSpans();
+  const dailygen = sdata.getDailyGen();
 
   let chartdata = schart.makeDatasets(generates, collabels, rowlabels);
   schart.makeChart('chartGenerate', chartdata, '電力量', '電力量(kwh)', 'line');
 
   chartdata = schart.makeDatasets(revenues, collabels, rowlabels);
   schart.makeChart('chartRevenue', chartdata, '金額', '金額', 'bar', true);
+
+  chartdata = schart.makeDatasets(dailygen, collabels, rowlabels);
+  schart.makeChart('chartDaily', chartdata, '1日あたりの電力量', '電力量(kwh/日)', 'bar');
   
   stable.makeTable('tableGenerate', generates, collabels, rowlabels);
   stable.makeTable('tableRevenue', revenues, collabels, rowlabels);
   stable.makeTable('tableSpan', spans, collabels, rowlabels);
+
 }
 
 class SolarChart {
@@ -108,6 +113,7 @@ class SolarData {
   #revenues;
   #generates;
   #spans;
+  #dailygen;
 
   constructor(dataJson) {
     this.#datajson = dataJson;
@@ -116,6 +122,7 @@ class SolarData {
     this.#revenues = [];
     this.#generates = [];
     this.#spans = [];
+    this.#dailygen = [];
   }
 
   getColLabels() {
@@ -220,6 +227,25 @@ class SolarData {
       this.#spans.push(span);
     }
     return this.#spans;
+  }
+
+  getDailyGen() {
+    if (this.#dailygen.length > 0) {
+      return this.#dailygen;
+    }
+    for (let i = 0; i < this.#spans.length; i++) {
+      let dgen = [];
+      for (let j = 0; j < 12; j++) {
+        if (this.#spans[i][j] != '') {
+          let dg = Math.ceil(this.#generates[i][j] / this.#spans[i][j]);
+          dgen.push(dg);
+        } else {
+          dgen.push(0);
+        }
+      }
+      this.#dailygen.push(dgen);
+    }
+    return this.#dailygen;
   }
 
   checkExcludeRow(i) {
