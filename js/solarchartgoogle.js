@@ -38,8 +38,9 @@ class SolarChartGoogle {
     const options = {
       chart: {
         title: ctitle,
-        subtitle: ''
-      }
+        subtitle: '',
+      },
+      isStacked: true,
     };
     const chart = new google.charts.Bar(canvas);
     chart.draw(data, google.charts.Bar.convertOptions(options));
