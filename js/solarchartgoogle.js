@@ -41,6 +41,20 @@ class SolarChartGoogle {
         subtitle: '',
       },
       isStacked: true,
+      series: {
+        0:{color:'#8dd3c7'},
+        1:{color:'#ffffb3'},
+        2:{color:'#bebada'},
+        3:{color:'#fb8072'},
+        4:{color:'#80b1d3'},
+        5:{color:'#fdb462'},
+        6:{color:'#8dd3c7'},
+        7:{color:'#ffffb3'},
+        8:{color:'#bebada'},
+        9:{color:'#fb8072'},
+        10:{color:'#80b1d3'},
+        11:{color:'#fdb462'}
+      }
     };
     const chart = new google.charts.Bar(canvas);
     chart.draw(data, google.charts.Bar.convertOptions(options));
