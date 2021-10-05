@@ -44,6 +44,9 @@ class SolarChart {
 
   makeChart(elementId, chartdata, ctitle, ytitle, charttype, stacked = false) {
     const canvas = document.getElementById(elementId);
+    if (canvas == null) {
+      return;
+    }
     const setup = {
       type: charttype,
       data: chartdata,
@@ -288,6 +291,9 @@ class SolarTable {
 
   makeTable(elementId, datarows, collabels, rowlabels) {
     const table = document.getElementById(elementId);
+    if (table == null) {
+      return;
+    }
     const tbl = document.createElement("table");
     const tblBody = document.createElement("tbody");
     tblBody.appendChild(this.makeColHead(collabels));
