@@ -1,5 +1,5 @@
 google.charts.load('current', {
-  'packages': ['corechart', 'bar']
+  'packages': ['corechart', 'bar', 'table']
 });
 google.charts.setOnLoadCallback(initChart);
 
@@ -17,13 +17,16 @@ function handleQueryResponse(response) {
 
   const sdata = new SolarData(dataj);
   const scg = new SolarChartGoogle();
+  const stg = new SolarTableGoogle(sdata);
 
   const collabels = sdata.getColLabels();
   const rowlabels = sdata.getRowLabels();
   const generates = sdata.getGenerates();
 
-  let chartdata = scg.makeDatasets(collabels, rowlabels, generates);
+  let chartdata = sdata.makeDatasets(generates);
   scg.makeChart('chartGenerate', chartdata, '電力量');
+
+  stg.drawTable('tableGenerate', chartdata);
 }
 
 class SolarChartGoogle {
@@ -60,23 +63,21 @@ class SolarChartGoogle {
     chart.draw(data, google.charts.Bar.convertOptions(options));
   }
 
-  makeDatasets(collabels, rowlabels, datarows) {
-    const datasets = [];
-    const cols = [];
-    cols.push('物件');
-    for (let i = 0; i < collabels.length; i++) {
-      cols.push(collabels[i]);
-    }
-    datasets.push(cols);
-    for (let i = 0; i < datarows.length; i++) {
-      const rows = [];
-      rows.push(rowlabels[i]);
-      for (let j = 0; j < datarows[i].length; j++) {
-        rows.push(datarows[i][j]);
-      }
-      datasets.push(rows);
-    }
-    return datasets;
+}
+
+class SolarTableGoogle {
+  #collabels;
+  #rowlabels;
+
+  constructor(solarData) {
+    this.#collabels = solarData.getColLabels();
+    this.#rowlabels = solarData.getRowLabels();
+  }
+
+  drawTable(elementId, chartData) {
+    const data = google.visualization.arrayToDataTable(chartData);
+    let table = new google.visualization.Table(document.getElementById(elementId));
+    table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
   }
 }
 
@@ -256,5 +257,24 @@ class SolarData {
       fromdate = new Date(String(thisyear - 1) + '/' + days[0]);
     }
     return (todate - fromdate) / 86400000 + 1;
+  }
+
+  makeDatasets(datarows) {
+    const datasets = [];
+    const cols = [];
+    cols.push('物件');
+    for (let i = 0; i < this.#collabels.length; i++) {
+      cols.push(this.#collabels[i]);
+    }
+    datasets.push(cols);
+    for (let i = 0; i < datarows.length; i++) {
+      const rows = [];
+      rows.push(this.#rowlabels[i]);
+      for (let j = 0; j < datarows[i].length; j++) {
+        rows.push(datarows[i][j]);
+      }
+      datasets.push(rows);
+    }
+    return datasets;
   }
 }
