@@ -17,10 +17,8 @@ function handleQueryResponse(response) {
 
   const sdata = new SolarData(dataj);
   const scg = new SolarChartGoogle();
-  const stg = new SolarTableGoogle(sdata);
+  const stg = new SolarTableGoogle();
 
-  const collabels = sdata.getColLabels();
-  const rowlabels = sdata.getRowLabels();
   const generates = sdata.getGenerates();
 
   let chartdata = sdata.makeDatasets(generates);
@@ -66,17 +64,9 @@ class SolarChartGoogle {
 }
 
 class SolarTableGoogle {
-  #collabels;
-  #rowlabels;
-
-  constructor(solarData) {
-    this.#collabels = solarData.getColLabels();
-    this.#rowlabels = solarData.getRowLabels();
-  }
-
   drawTable(elementId, chartData) {
     const data = google.visualization.arrayToDataTable(chartData);
-    let table = new google.visualization.Table(document.getElementById(elementId));
+    const table = new google.visualization.Table(document.getElementById(elementId));
     table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
   }
 }
@@ -99,6 +89,8 @@ class SolarData {
     this.#generates = [];
     this.#spans = [];
     this.#dailygen = [];
+    this.#collabels = this.getColLabels();
+    this.#rowlabels = this.getRowLabels();
   }
 
   getColLabels() {
