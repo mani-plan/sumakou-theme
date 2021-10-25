@@ -24,11 +24,17 @@ function handleQueryResponse(response) {
 
   let chartdata = sdata.makeDatasets(generates);
   scg.makeChart('chartGenerate', chartdata, '電力量');
-  stg.drawTable('tableGenerate', chartdata);
+
+  const gensum = sdata.getGenerateSum();
+  let tabledata = sdata.makeTableDatasets(generates, gensum);
+  stg.drawTable('tableGenerate', tabledata);
 
   chartdata = sdata.makeDatasets(revenues);
   scg.makeChart('chartRevenue', chartdata, '金額');
-  stg.drawTable('tableRevenue', chartdata);
+
+  const revsum = sdata.getRevenueSum();
+  tabledata = sdata.makeTableDatasets(revenues, revsum);
+  stg.drawTable('tableRevenue', tabledata);
 
 }
 
@@ -83,8 +89,8 @@ class SolarData {
   #rowlabels;
   #revenues;
   #generates;
-  #revenuesums;
-  #generatesums;
+  #revenuesum;
+  #generatesum;
 
   constructor(dataJson) {
     this.#datajson = dataJson;
@@ -92,8 +98,8 @@ class SolarData {
     this.#rowlabels = [];
     this.#revenues = [];
     this.#generates = [];
-    this.#revenuesums = [];
-    this.#generatesums = [];
+    this.#revenuesum = [];
+    this.#generatesum = [];
     this.#collabels = this.getColLabels();
     this.#rowlabels = this.getRowLabels();
   }
@@ -150,6 +156,28 @@ class SolarData {
     return this.#revenues;
   }
 
+  getRevenueSum() {
+    if (this.#revenuesum.length > 0) {
+      return this.#revenuesum;
+    }
+    this.#revenuesum = [];
+    for (let i = 0; i < this.#datajson.rows.length; i++) {
+      if (this.checkExcludeRow(i) == true) {
+        continue;
+      }
+      if (this.#datajson.rows[i].c[25] != null) {
+        if (this.#datajson.rows[i].c[25].v != null) {
+          this.#revenuesum.push(this.#datajson.rows[i].c[25].v);
+        } else {
+          this.#revenuesum.push(0);
+        }
+      } else {
+        this.#revenuesum.push(0);
+      }
+    }
+    return this.#revenuesum;
+  }
+
   getGenerates() {
     if (this.#generates.length > 0) {
       return this.#generates;
@@ -174,6 +202,20 @@ class SolarData {
       this.#generates.push(gen);
     }
     return this.#generates;
+  }
+
+  getGenerateSum() {
+    if (this.#generatesum.length > 0) {
+      return this.#generatesum;
+    }
+    for (let i = 0; i < this.#generates.length; i++) {
+      let gens = 0;
+      for (let j = 0; j < this.#generates[i].length; j++) {
+        gens += this.#generates[i][j];
+      }
+      this.#generatesum.push(gens);
+    }
+    return this.#generatesum;
   }
 
   checkExcludeRow(i) {
@@ -216,6 +258,28 @@ class SolarData {
       }
       datasets.push(rows);
     }
+    return datasets;
+  }
+
+  makeTableDatasets(datarows, datasums) {
+    const datasets = [];
+    const cols = [];
+    cols.push('物件');
+    for (let i = 0; i < this.#collabels.length; i++) {
+      cols.push(this.#collabels[i]);
+    }
+    cols.push('合計');
+    datasets.push(cols);
+    for (let i = 0; i < datarows.length; i++) {
+      const rows = [];
+      rows.push(this.#rowlabels[i]);
+      for (let j = 0; j < datarows[i].length; j++) {
+        rows.push(datarows[i][j]);
+      }
+      rows.push(datasums[i]);
+      datasets.push(rows);
+    }
+
     return datasets;
   }
 }
