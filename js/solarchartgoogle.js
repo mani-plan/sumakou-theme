@@ -20,11 +20,16 @@ function handleQueryResponse(response) {
   const stg = new SolarTableGoogle();
 
   const generates = sdata.getGenerates();
+  const revenues = sdata.getRevenues();
 
   let chartdata = sdata.makeDatasets(generates);
   scg.makeChart('chartGenerate', chartdata, '電力量');
-
   stg.drawTable('tableGenerate', chartdata);
+
+  chartdata = sdata.makeDatasets(revenues);
+  scg.makeChart('chartRevenue', chartdata, '金額');
+  stg.drawTable('tableRevenue', chartdata);
+
 }
 
 class SolarChartGoogle {
@@ -78,8 +83,8 @@ class SolarData {
   #rowlabels;
   #revenues;
   #generates;
-  #spans;
-  #dailygen;
+  #revenuesums;
+  #generatesums;
 
   constructor(dataJson) {
     this.#datajson = dataJson;
@@ -87,8 +92,8 @@ class SolarData {
     this.#rowlabels = [];
     this.#revenues = [];
     this.#generates = [];
-    this.#spans = [];
-    this.#dailygen = [];
+    this.#revenuesums = [];
+    this.#generatesums = [];
     this.#collabels = this.getColLabels();
     this.#rowlabels = this.getRowLabels();
   }
@@ -98,9 +103,9 @@ class SolarData {
       return this.#collabels;
     }
     for (let j = 0; j < 12; j++) {
-      if (this.#datajson.cols[j * 4 + 1].label != null) {
-        let label = this.#datajson.cols[j * 4 + 1].label;
-        this.#collabels.push(label.replace(' 期間', ''));
+      if (this.#datajson.cols[j * 2 + 1].label != null) {
+        let label = this.#datajson.cols[j * 2 + 1].label;
+        this.#collabels.push(label.replace(' 電力量', ''));
       }
     }
     return this.#collabels;
@@ -130,9 +135,9 @@ class SolarData {
       }
       let rev = [];
       for (let j = 0; j < 12; j++) {
-        if (this.#datajson.rows[i].c[j * 4 + 3] != null) {
-          if (this.#datajson.rows[i].c[j * 4 + 3].v != null) {
-            rev.push(this.#datajson.rows[i].c[j * 4 + 3].v);
+        if (this.#datajson.rows[i].c[j * 2 + 2] != null) {
+          if (this.#datajson.rows[i].c[j * 2 + 2].v != null) {
+            rev.push(this.#datajson.rows[i].c[j * 2 + 2].v);
           } else {
             rev.push(0);
           }
@@ -155,9 +160,9 @@ class SolarData {
       }
       let gen = [];
       for (let j = 0; j < 12; j++) {
-        if (this.#datajson.rows[i].c[j * 4 + 2] != null) {
-          if (this.#datajson.rows[i].c[j * 4 + 2].v != null) {
-            let kwh = this.#datajson.rows[i].c[j * 4 + 2].v;
+        if (this.#datajson.rows[i].c[j * 2 + 1] != null) {
+          if (this.#datajson.rows[i].c[j * 2 + 1].v != null) {
+            let kwh = this.#datajson.rows[i].c[j * 2 + 1].v;
             gen.push(this.getKwhNumber(kwh));
           } else {
             gen.push(0);
@@ -171,51 +176,6 @@ class SolarData {
     return this.#generates;
   }
 
-  getSpans() {
-    if (this.#spans.length > 0) {
-      return this.#spans;
-    }
-    for (let i = 0; i < this.#datajson.rows.length; i++) {
-      if (this.checkExcludeRow(i) == true) {
-        continue;
-      }
-      let span = [];
-      for (let j = 0; j < 12; j++) {
-        if (this.#datajson.rows[i].c[j * 4 + 1] != null) {
-          if (this.#datajson.rows[i].c[j * 4 + 1].v != null) {
-            let spn = this.#datajson.rows[i].c[j * 4 + 1].v;
-            span.push(this.getDate(spn));
-          } else {
-            span.push('');
-          }
-        } else {
-          span.push('');
-        }
-      }
-      this.#spans.push(span);
-    }
-    return this.#spans;
-  }
-
-  getDailyGen() {
-    if (this.#dailygen.length > 0) {
-      return this.#dailygen;
-    }
-    for (let i = 0; i < this.#spans.length; i++) {
-      let dgen = [];
-      for (let j = 0; j < 12; j++) {
-        if (this.#spans[i][j] != '') {
-          let dg = Math.ceil(this.#generates[i][j] / this.#spans[i][j]);
-          dgen.push(dg);
-        } else {
-          dgen.push(0);
-        }
-      }
-      this.#dailygen.push(dgen);
-    }
-    return this.#dailygen;
-  }
-
   checkExcludeRow(i) {
     if (this.#datajson.rows[i].c[0] == null) {
       return true;
@@ -224,7 +184,7 @@ class SolarData {
       return true;
     }
     const rowLabel = this.#datajson.rows[i].c[0].v;
-    const exLabel = ['', '≪個人≫', '≪法人≫', '合計', '個人法人合計'];
+    const exLabel = ['', '合計'];
     if (typeof rowLabel == 'object') {
       rowLabel = rowLabel.innerText;
     }
@@ -240,21 +200,10 @@ class SolarData {
     return parseInt(kwh, 10);
   }
 
-  getDate(datestr) {
-    const thisyear = 2021;
-    const days = datestr.split('～');
-    let fromdate = new Date(String(thisyear) + '/' + days[0]);
-    const todate = new Date(String(thisyear) + '/' + days[1]);
-    if (fromdate > todate) {
-      fromdate = new Date(String(thisyear - 1) + '/' + days[0]);
-    }
-    return (todate - fromdate) / 86400000 + 1;
-  }
-
   makeDatasets(datarows) {
     const datasets = [];
     const cols = [];
-    cols.push('物件');
+    cols.push('');
     for (let i = 0; i < this.#collabels.length; i++) {
       cols.push(this.#collabels[i]);
     }
