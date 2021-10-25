@@ -53,6 +53,7 @@ class SolarChartGoogle {
         subtitle: '',
       },
       isStacked: true,
+      bars: 'horizontal',
       series: {
         0:{color:'#8dd3c7'},
         1:{color:'#ffffb3'},
