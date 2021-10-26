@@ -20,7 +20,7 @@ if (have_posts()) :
         echo get_bloginfo('template_directory') . '/images/main_company.jpg';
     }
     ?>);" id="pagetop">
-  <h1 class="page-title"><?php the_title();?></h1>
+  <h1 class="page-title">太陽光発電実績</h1>
 </div><!-- /.main-img-area -->
 
 <div class="page inner">

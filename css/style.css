@@ -58,6 +58,15 @@ a.tdu:hover {
 .sp-only {
   display: none;
 }
+.mb00 {
+  margin-bottom: 0 !important;
+}
+.mb1em {
+  margin-bottom: 1.5em;
+}
+.pd1em {
+  padding: 1.5em;
+}
 
 @media only screen and ( max-width: 767px ) {
   .btn {
