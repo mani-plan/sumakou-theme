@@ -71,7 +71,7 @@ Template Name: FrontPage
 
 <div class="pickup-page">
   <ul class="inner narrow">
-    <li class="fadein solar"><a href="<?php echo esc_url(home_url('/total_of_solar_power')); ?>"><span>当社施工の</span>太陽光発電実績 すべて公開中！</a></li>
+    <li class="fadein solar"><a href="<?php echo esc_url(home_url('/solardata')); ?>"><span>当社施工の</span>太陽光発電実績 すべて公開中！</a></li>
     <li class="fadein estate"><a href="<?php echo esc_url(home_url('/estate')); ?>"><span>当社施工の</span>自社所有物件はこちら！</a></li>
   </ul>
 </div><!-- /.pickup-page -->

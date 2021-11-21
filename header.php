@@ -40,6 +40,7 @@
             <li><a href="<?php echo esc_url(home_url('/company#service')); ?>">事業内容</a></li>
             <li><a href="<?php echo esc_url(home_url('/company#about')); ?>">会社概要</a></li>
             <li><a href="<?php echo esc_url(home_url('/company#access')); ?>">アクセス</a></li>
+            <li><a href="<?php echo esc_url(home_url('/solardata')); ?>">太陽光発電実績</a></li>
             <li><a href="<?php echo esc_url(home_url('/estate')); ?>">自社所有物件</a></li>
             <li><a href="<?php echo esc_url(home_url('/target')); ?>">弊社の目標</a></li>
           </ul></li>
